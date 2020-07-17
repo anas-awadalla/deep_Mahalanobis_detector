@@ -7,6 +7,7 @@ import numpy as np
 import os
 import lib_regression
 import argparse
+from densenet121 import DenseNet121
 
 from sklearn.linear_model import LogisticRegressionCV
 
@@ -18,6 +19,9 @@ print(args)
 def main():
     # initial setup
     dataset_list = ['cifar10', 'cifar100', 'svhn']
+    dataset_list = ['cifar10']
+    if args.net_type == 'densenet121':
+        dataset_list = ['ham10000']
     adv_test_list = ['FGSM', 'BIM', 'DeepFool', 'CWL2']
 
     print('evaluate the LID estimator')
@@ -33,13 +37,15 @@ def main():
             for score in score_list:
                 print('load train data: ', out, ' of ', score)
                 total_X, total_Y = lib_regression.load_characteristics(score, dataset, out, outf)
-                X_val, Y_val, X_test, Y_test = lib_regression.block_split_adv(total_X, total_Y)
-                pivot = int(X_val.shape[0] / 6)
-                X_train = np.concatenate((X_val[:pivot], X_val[2*pivot:3*pivot], X_val[4*pivot:5*pivot]))
-                Y_train = np.concatenate((Y_val[:pivot], Y_val[2*pivot:3*pivot], Y_val[4*pivot:5*pivot]))
-                X_val_for_test = np.concatenate((X_val[pivot:2*pivot], X_val[3*pivot:4*pivot], X_val[5*pivot:]))
-                Y_val_for_test = np.concatenate((Y_val[pivot:2*pivot], Y_val[3*pivot:4*pivot], Y_val[5*pivot:]))
-                lr = LogisticRegressionCV(n_jobs=-1).fit(X_train, Y_train)
+                #X_val, Y_val, X_test, Y_test = lib_regression.block_split_adv(total_X, total_Y)
+                X_val, Y_val, X_test, Y_test = lib_regression.stratified_split(total_X, total_Y)
+                #pivot = int(X_val.shape[0] / 6)
+                #X_train = np.concatenate((X_val[:pivot], X_val[2*pivot:3*pivot], X_val[4*pivot:5*pivot]))
+                #Y_train = np.concatenate((Y_val[:pivot], Y_val[2*pivot:3*pivot], Y_val[4*pivot:5*pivot]))
+                #X_val_for_test = np.concatenate((X_val[pivot:2*pivot], X_val[3*pivot:4*pivot], X_val[5*pivot:]))
+                #Y_val_for_test = np.concatenate((Y_val[pivot:2*pivot], Y_val[3*pivot:4*pivot], Y_val[5*pivot:]))
+                X_train, Y_train, X_val_for_test, Y_val_for_test = lib_regression.stratified_split(X_val, Y_val, test_size=0.5)
+                lr = LogisticRegressionCV(n_jobs=-1, max_iter=1000).fit(X_train, Y_train)
                 y_pred = lr.predict_proba(X_train)[:, 1]
                 #print('training mse: {:.4f}'.format(np.mean(y_pred - Y_train)))
                 y_pred = lr.predict_proba(X_val_for_test)[:, 1]
@@ -67,13 +73,15 @@ def main():
             for score in score_list:
                 print('load train data: ', out, ' of ', score)
                 total_X, total_Y = lib_regression.load_characteristics(score, dataset, out, outf)
-                X_val, Y_val, X_test, Y_test = lib_regression.block_split_adv(total_X, total_Y)
+                #X_val, Y_val, X_test, Y_test = lib_regression.block_split_adv(total_X, total_Y)
+                X_val, Y_val, X_test, Y_test = lib_regression.stratified_split(total_X, total_Y)
                 pivot = int(X_val.shape[0] / 6)
-                X_train = np.concatenate((X_val[:pivot], X_val[2*pivot:3*pivot], X_val[4*pivot:5*pivot]))
-                Y_train = np.concatenate((Y_val[:pivot], Y_val[2*pivot:3*pivot], Y_val[4*pivot:5*pivot]))
-                X_val_for_test = np.concatenate((X_val[pivot:2*pivot], X_val[3*pivot:4*pivot], X_val[5*pivot:]))
-                Y_val_for_test = np.concatenate((Y_val[pivot:2*pivot], Y_val[3*pivot:4*pivot], Y_val[5*pivot:]))
-                lr = LogisticRegressionCV(n_jobs=-1).fit(X_train, Y_train)
+                #X_train = np.concatenate((X_val[:pivot], X_val[2*pivot:3*pivot], X_val[4*pivot:5*pivot]))
+                #Y_train = np.concatenate((Y_val[:pivot], Y_val[2*pivot:3*pivot], Y_val[4*pivot:5*pivot]))
+                #X_val_for_test = np.concatenate((X_val[pivot:2*pivot], X_val[3*pivot:4*pivot], X_val[5*pivot:]))
+                #Y_val_for_test = np.concatenate((Y_val[pivot:2*pivot], Y_val[3*pivot:4*pivot], Y_val[5*pivot:]))
+                X_train, Y_train, X_val_for_test, Y_val_for_test = lib_regression.stratified_split(X_val, Y_val, test_size=0.5)
+                lr = LogisticRegressionCV(n_jobs=-1, max_iter=1000).fit(X_train, Y_train)
                 y_pred = lr.predict_proba(X_train)[:, 1]
                 #print('training mse: {:.4f}'.format(np.mean(y_pred - Y_train)))
                 y_pred = lr.predict_proba(X_val_for_test)[:, 1]

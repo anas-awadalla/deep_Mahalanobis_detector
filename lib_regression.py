@@ -3,6 +3,7 @@ from __future__ import print_function
 import numpy as np
 import os
 import calculate_log as callog
+from sklearn.model_selection import train_test_split
 
 from scipy.spatial.distance import pdist, cdist, squareform
 
@@ -29,6 +30,12 @@ def block_split(X, Y, out):
 
     return X_train, Y_train, X_test, Y_test
 
+def stratified_split(X, y, test_size=0.5):
+    X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                    stratify=y, 
+                                                    test_size=test_size)
+
+    return X_train, y_train, X_test, y_test
 
 def block_split_adv(X, Y):
     """
@@ -40,7 +47,7 @@ def block_split_adv(X, Y):
     X_adv, Y_adv = X[:partition], Y[:partition]
     X_norm, Y_norm = X[partition: 2*partition], Y[partition: 2*partition]
     X_noisy, Y_noisy = X[2*partition:], Y[2*partition:]
-    num_train = int(partition*0.1)
+    num_train = int(partition)
     X_train = np.concatenate((X_norm[:num_train], X_noisy[:num_train], X_adv[:num_train]))
     Y_train = np.concatenate((Y_norm[:num_train], Y_noisy[:num_train], Y_adv[:num_train]))
 
@@ -59,11 +66,17 @@ def detection_performance(regressor, X, Y, outf):
     l2 = open('%s/confidence_TMP_Out.txt'%outf, 'w')
     y_pred = regressor.predict_proba(X)[:, 1]
 
+    novel_count = 0
+    known_count = 0
+    
     for i in range(num_samples):
         if Y[i] == 0:
+            known_count+=1
             l1.write("{}\n".format(-y_pred[i]))
         else:
+            novel_count+=1
             l2.write("{}\n".format(-y_pred[i]))
+            
     l1.close()
     l2.close()
     results = callog.metric(outf, ['TMP'])

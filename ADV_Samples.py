@@ -11,6 +11,7 @@ import numpy as np
 import models
 import os
 import lib.adversary as adversary
+from densenet121 import DenseNet121
 
 from torchvision import transforms
 from torch.autograd import Variable
@@ -30,6 +31,8 @@ print(args)
 def main():
     # set the path to pre-trained model and output
     pre_trained_net = './pre_trained/' + args.net_type + '_' + args.dataset + '.pth'
+    if os.path.isdir(args.outf) == False:
+        os.mkdir(args.outf)
     args.outf = args.outf + args.net_type + '_' + args.dataset + '/'
     if os.path.isdir(args.outf) == False:
         os.mkdir(args.outf)
@@ -132,6 +135,24 @@ def main():
                 random_noise_size = 0.126
             elif args.adv_type == 'CWL2':
                 random_noise_size = 0.05 / 1 
+                
+    elif args.net_type == 'densenet121':
+        model = DenseNet121(num_classes=args.num_classes)
+        model.load_state_dict(torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu)).state_dict())
+        in_transform = transforms.Compose([transforms.Resize(224), transforms.CenterCrop(224), transforms.ToTensor(), transforms.Normalize((0.7630069, 0.5456578, 0.5700767), (0.14093237, 0.15263236, 0.17000099))])
+        
+        min_pixel = -10
+        max_pixel = 10
+        
+        if args.adv_type == 'FGSM':
+            random_noise_size = 0.25 / 4
+        elif args.adv_type == 'BIM':
+            random_noise_size = 0.13 / 2
+        elif args.adv_type == 'DeepFool':
+            random_noise_size = 0.126
+        elif args.adv_type == 'CWL2':
+            random_noise_size = 0.05 / 1 
+        
             
     model.cuda()
     print('load model: ' + args.net_type)

@@ -9,6 +9,7 @@ import data_loader
 import numpy as np
 import calculate_log as callog
 import models
+from densenet121 import DenseNet121
 import os
 import lib_generation
 
@@ -37,10 +38,14 @@ def main():
     # check the in-distribution dataset
     if args.dataset == 'cifar100':
         args.num_classes = 100
-    if args.dataset == 'svhn':
-        out_dist_list = ['cifar10', 'imagenet_resize', 'lsun_resize']
-    else:
         out_dist_list = ['svhn', 'imagenet_resize', 'lsun_resize']
+    elif args.dataset == 'svhn':
+        out_dist_list = ['cifar10', 'imagenet_resize', 'lsun_resize']
+    elif args.dataset == 'ham10000':
+        #out_dist_list = ['cifar10', 'imagenet_resize', 'face', 'face_age', 'isic-2017', 'isic-2016']
+        #out_dist_list = ['cifar10', 'face', 'face_age', 'isic-2017', 'isic-2016']
+        #out_dist_list = ['cifar10', 'cifar100', 'svhn', 'imagenet_resize', 'lsun_resize', 'face', 'face_age', 'isic-2017', 'isic-2016']
+        out_dist_list = ['ham10000-avg-smoothing','ham10000-brightness','ham10000-contrast','ham10000-dilation','ham10000-erosion','ham10000-med-smoothing','ham10000-rotation','ham10000-shift']
         
     # load networks
     if args.net_type == 'densenet':
@@ -54,6 +59,10 @@ def main():
         model = models.ResNet34(num_c=args.num_classes)
         model.load_state_dict(torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu)))
         in_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),])
+    elif args.net_type == 'densenet121':
+        model = DenseNet121(num_classes=args.num_classes)
+        model.load_state_dict(torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu)).state_dict())
+        in_transform = transforms.Compose([transforms.Resize(224), transforms.CenterCrop(224), transforms.ToTensor(), transforms.Normalize((0.7630069, 0.5456578, 0.5700767), (0.14093237, 0.15263236, 0.17000099))])
     model.cuda()
     print('load model: ' + args.net_type)
     
@@ -76,11 +85,12 @@ def main():
     print('get sample mean and covariance')
     sample_mean, precision = lib_generation.sample_estimator(model, args.num_classes, feature_list, train_loader)
     
-    print('get Mahalanobis scores')
+    print('get Mahalanobis scores', num_output)
     m_list = [0.0, 0.01, 0.005, 0.002, 0.0014, 0.001, 0.0005]
     for magnitude in m_list:
         print('Noise: ' + str(magnitude))
         for i in range(num_output):
+            print('layer_num', i)
             M_in = lib_generation.get_Mahalanobis_score(model, test_loader, args.num_classes, args.outf, \
                                                         True, args.net_type, sample_mean, precision, i, magnitude)
             M_in = np.asarray(M_in, dtype=np.float32)

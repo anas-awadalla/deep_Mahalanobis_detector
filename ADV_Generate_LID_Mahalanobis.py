@@ -11,6 +11,7 @@ import calculate_log as callog
 import models
 import os
 import lib_generation
+from densenet121 import DenseNet121
 
 from torchvision import transforms
 from torch.autograd import Variable
@@ -30,6 +31,8 @@ print(args)
 def main():
     # set the path to pre-trained model and output
     pre_trained_net = './pre_trained/' + args.net_type + '_' + args.dataset + '.pth'
+    if os.path.isdir(args.outf) == False:
+        os.mkdir(args.outf)
     args.outf = args.outf + args.net_type + '_' + args.dataset + '/'
     if os.path.isdir(args.outf) == False:
         os.mkdir(args.outf)
@@ -51,6 +54,10 @@ def main():
         model = models.ResNet34(num_c=args.num_classes)
         model.load_state_dict(torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu)))
         in_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),])
+    elif args.net_type == 'densenet121':
+        model = DenseNet121(num_classes=args.num_classes)
+        model.load_state_dict(torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu)).state_dict())
+        in_transform = transforms.Compose([transforms.Resize(224), transforms.CenterCrop(224), transforms.ToTensor(), transforms.Normalize((0.7630069, 0.5456578, 0.5700767), (0.14093237, 0.15263236, 0.17000099))])
     model.cuda()
     print('load model: ' + args.net_type)
     
@@ -79,7 +86,7 @@ def main():
     
     print('get LID scores')
     LID, LID_adv, LID_noisy \
-    = lib_generation.get_LID(model, test_clean_data, test_adv_data, test_noisy_data, test_label, num_output)          
+    = lib_generation.get_LID(model, test_clean_data, test_adv_data, test_noisy_data, test_label, num_output, args.batch_size)          
     overlap_list = [10, 20, 30, 40, 50, 60, 70, 80, 90]
     list_counter = 0
     for overlap in overlap_list:
@@ -101,7 +108,7 @@ def main():
             M_in \
             = lib_generation.get_Mahalanobis_score_adv(model, test_clean_data, test_label, \
                                                        args.num_classes, args.outf, args.net_type, \
-                                                       sample_mean, precision, i, magnitude)
+                                                       sample_mean, precision, i, magnitude, args.batch_size)
             M_in = np.asarray(M_in, dtype=np.float32)
             if i == 0:
                 Mahalanobis_in = M_in.reshape((M_in.shape[0], -1))
@@ -112,7 +119,7 @@ def main():
             M_out \
             = lib_generation.get_Mahalanobis_score_adv(model, test_adv_data, test_label, \
                                                        args.num_classes, args.outf, args.net_type, \
-                                                       sample_mean, precision, i, magnitude)
+                                                       sample_mean, precision, i, magnitude, args.batch_size)
             M_out = np.asarray(M_out, dtype=np.float32)
             if i == 0:
                 Mahalanobis_out = M_out.reshape((M_out.shape[0], -1))
@@ -123,7 +130,7 @@ def main():
             M_noisy \
             = lib_generation.get_Mahalanobis_score_adv(model, test_noisy_data, test_label, \
                                                        args.num_classes, args.outf, args.net_type, \
-                                                       sample_mean, precision, i, magnitude)
+                                                       sample_mean, precision, i, magnitude, args.batch_size)
             M_noisy = np.asarray(M_noisy, dtype=np.float32)
             if i == 0:
                 Mahalanobis_noisy = M_noisy.reshape((M_noisy.shape[0], -1))
