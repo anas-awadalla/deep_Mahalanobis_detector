@@ -9,6 +9,18 @@ from glob import glob
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+def get_mPower(batch_size, TF, data_root='../Evaluating Models/Data/mPower/', train=True, val=True, **kwargs):
+    train_loader =  torch.load(data_root+"train_loader.pth")
+    val_loader =  torch.load(data_root+"val_loader.pth")
+
+    if train and not val:
+        return train_loader
+    elif not train and val:
+        return val_loader 
+    else:
+        return train_loader, val_loader
+
+
 def getHAM10000(batch_size, TF, data_root='../Evaluating Models/Data/skin-cancer-mnist-ham10000/', train=True, val=True, **kwargs):
     all_image_path = glob(os.path.join(data_root, '*', '*.jpg'))
     imageid_path_dict = {os.path.splitext(os.path.basename(x))[0]: x for x in all_image_path}
@@ -259,6 +271,8 @@ def getTargetDataSet(data_type, batch_size, input_TF, dataroot):
     elif data_type == 'svhn':
         train_loader, test_loader = getSVHN(batch_size=batch_size, TF=input_TF, data_root=dataroot, num_workers=1)
     elif data_type == 'ham10000':
+        train_loader, test_loader = getHAM10000(batch_size=batch_size, TF=input_TF, num_workers=1)
+    elif data_type == 'mpower':
         train_loader, test_loader = getHAM10000(batch_size=batch_size, TF=input_TF, num_workers=1)
 
     return train_loader, test_loader
