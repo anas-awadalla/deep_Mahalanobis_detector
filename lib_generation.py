@@ -66,9 +66,20 @@ def sample_estimator(model, num_classes, feature_list, train_loader):
     
     for data, target in train_loader:
         total += data.size(0)
-        data = data.cuda()
-        data = Variable(data, volatile=True)
-        output, out_features = model.feature_list(data)
+
+        dataTensor = data.cuda()
+
+        data = Variable(dataTensor, volatile=True)
+        try:
+            output, out_features = model.feature_list(data)
+        except:
+            dataTensor = torch.tensor(dataTensor, dtype=torch.float).cuda()
+            data = Variable(dataTensor, volatile=True)
+            output, out_features = model.feature_list(data)
+
+
+            
+        
         
         # get hidden features
         for i in range(num_output):
@@ -84,7 +95,9 @@ def sample_estimator(model, num_classes, feature_list, train_loader):
         
         # construct the sample matrix
         for i in range(data.size(0)):
+        
             label = target[i]
+   
             if num_sample_per_class[label] == 0:
                 out_count = 0
                 for out in out_features:
@@ -155,10 +168,15 @@ def get_Mahalanobis_score(model, test_loader, num_classes, outf, out_flag, net_t
     
     for data, target in test_loader:
         
-        data, target = data.cuda(), target.cuda()
-        data, target = Variable(data, requires_grad = True), Variable(target)
-        
-        out_features = model.intermediate_forward(data, layer_index)
+        dataTensor, target = data.cuda(), target.cuda()
+        data, target = Variable(dataTensor, requires_grad = True), Variable(target)
+        try:
+            out_features = model.intermediate_forward(data, layer_index)
+        except:
+            dataTensor = torch.tensor(dataTensor, dtype=torch.float).cuda()
+            data = Variable(dataTensor, requires_grad = True)
+            out_features = model.intermediate_forward(data, layer_index)
+            
         out_features = out_features.view(out_features.size(0), out_features.size(1), -1)
         out_features = torch.mean(out_features, 2)
         

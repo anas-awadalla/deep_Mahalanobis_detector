@@ -2,7 +2,8 @@ import os
 from torch.utils.data import Dataset, DataLoader
 import math
 import pandas as pd
-from tqdm import tqdm.notebook
+from tqdm import tqdm
+import numpy as np
 
 def correct_batch(batch):
     while len(batch)<4000:
@@ -57,6 +58,7 @@ class mHealthData(Dataset):
             self.result[k][1] = correct_batch(self.result[k][1])
             self.result[k][2] = correct_batch(self.result[k][2])
             k = k+1
+        self.result = np.asarray(self.result)
 
 
 

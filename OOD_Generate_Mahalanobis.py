@@ -10,8 +10,11 @@ import numpy as np
 import calculate_log as callog
 import models
 from densenet121 import DenseNet121
+import parkinsonsNet
 import os
 import lib_generation
+from parkinsonsNet import Network
+from parkinsons_dataset import testMotionData
 
 from torchvision import transforms
 from torch.autograd import Variable
@@ -20,16 +23,16 @@ parser = argparse.ArgumentParser(description='PyTorch code: Mahalanobis detector
 parser.add_argument('--batch_size', type=int, default=200, metavar='N', help='batch size for data loader')
 parser.add_argument('--dataset', required=True, help='cifar10 | cifar100 | svhn')
 parser.add_argument('--dataroot', default='./data', help='path to dataset')
-parser.add_argument('--outf', default='./output/', help='folder to output results')
+parser.add_argument('--outf', default='/home/anasa2/deep_Mahalanobis_detector/output/', help='folder to output results')
 parser.add_argument('--num_classes', type=int, default=10, help='the # of classes')
-parser.add_argument('--net_type', required=True, help='resnet | densenet')
+parser.add_argument('--net_type', required=True, help='resnet | densenet | parkinsonsNet')
 parser.add_argument('--gpu', type=int, default=0, help='gpu index')
 args = parser.parse_args()
 print(args)
 
 def main():
     # set the path to pre-trained model and output
-    pre_trained_net = './pre_trained/' + args.net_type + '_' + args.dataset + '.pth'
+    pre_trained_net = '/home/anasa2/deep_Mahalanobis_detector/pre_trained/' + args.net_type + '_' + args.dataset + '.pth'
     args.outf = args.outf + args.net_type + '_' + args.dataset + '/'
     if os.path.isdir(args.outf) == False:
         os.mkdir(args.outf)
@@ -46,7 +49,8 @@ def main():
         #out_dist_list = ['cifar10', 'face', 'face_age', 'isic-2017', 'isic-2016']
         #out_dist_list = ['cifar10', 'cifar100', 'svhn', 'imagenet_resize', 'lsun_resize', 'face', 'face_age', 'isic-2017', 'isic-2016']
         out_dist_list = ['ham10000-avg-smoothing','ham10000-brightness','ham10000-contrast','ham10000-dilation','ham10000-erosion','ham10000-med-smoothing','ham10000-rotation','ham10000-shift']
-        
+    elif args.dataset == 'mpower':
+        out_dist_list = ['mHealth']
     # load networks
     if args.net_type == 'densenet':
         if args.dataset == 'svhn':
@@ -63,17 +67,28 @@ def main():
         model = DenseNet121(num_classes=args.num_classes)
         model.load_state_dict(torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu)).state_dict())
         in_transform = transforms.Compose([transforms.Resize(224), transforms.CenterCrop(224), transforms.ToTensor(), transforms.Normalize((0.7630069, 0.5456578, 0.5700767), (0.14093237, 0.15263236, 0.17000099))])
+    elif args.net_type == 'parkinsonsNet':
+        model = Network()
+        model= torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu))
+        in_transform = None
     model.cuda()
     print('load model: ' + args.net_type)
     
     # load dataset
     print('load target data: ', args.dataset)
-    train_loader, test_loader = data_loader.getTargetDataSet(args.dataset, args.batch_size, in_transform, args.dataroot)
+    if args.dataset == "mpower":
+        train_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinson'sDataloaders/val_loader.pth")
+        test_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinson'sDataloaders/val_loader.pth")
+    else:
+        train_loader, test_loader = data_loader.getTargetDataSet(args.dataset, args.batch_size, in_transform, args.dataroot)
     
     # set information about feature extaction
     model.eval()
     temp_x = torch.rand(2,3,32,32).cuda()
     temp_x = Variable(temp_x)
+    if args.net_type == 'parkinsonsNet':
+        temp_x = torch.rand(8,3,4000).cuda()
+        temp_x = Variable(temp_x) 
     temp_list = model.feature_list(temp_x)[1]
     num_output = len(temp_list)
     feature_list = np.empty(num_output)
