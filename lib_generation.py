@@ -170,7 +170,6 @@ def get_Mahalanobis_score(model, test_loader, num_classes, outf, out_flag, net_t
     g = open(temp_file_name, 'w')
     
     for data, target in test_loader:
-        
         dataTensor, target = data.cuda(), target.cuda()
         data, target = Variable(dataTensor, requires_grad = True), Variable(target)
         try:

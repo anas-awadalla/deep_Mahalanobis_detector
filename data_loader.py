@@ -25,7 +25,7 @@ def get_mPower(batch_size, TF, data_root='../Evaluating Models/Data/mPower/', tr
     else:
         return train_loader, val_loader
 
-def get_mHealth(batch_size, TF, data_root='../Evaluating Models/Data/mHealth/', train=False, val=True, **kwargs):
+def get_mHealth(batch_size, TF, data_root='../Evaluating Models/Data/mHealth/', train=True, val=True, **kwargs):
     ds = []
     
     if train:
@@ -41,7 +41,7 @@ def get_mHealth(batch_size, TF, data_root='../Evaluating Models/Data/mHealth/', 
     return ds
 
 
-def get_MotionSense(batch_size, TF, data_root='../Evaluating Models/Data/MotionSense/', train=False, val=True, **kwargs):
+def get_MotionSense(batch_size, TF, data_root='../Evaluating Models/Data/MotionSense/', train=True, val=True, **kwargs):
     ds = []
     
     if train:
@@ -57,7 +57,7 @@ def get_MotionSense(batch_size, TF, data_root='../Evaluating Models/Data/MotionS
     return ds
 
 
-def get_oodParkinsons(batch_size, TF, data_root='../Evaluating Models/Data/oodParkinsons/', train=False, val=True, **kwargs):
+def get_oodParkinsons(batch_size, TF, data_root='../Evaluating Models/Data/oodParkinsons/', train=True, val=True, **kwargs):
     ds = []
     
     if train:
@@ -372,11 +372,12 @@ def getNonTargetDataSet(data_type, batch_size, input_TF, dataroot):
     elif data_type == 'ham10000-shift':
         _, test_loader = getHAM10000Transformed(batch_size=batch_size, TF=input_TF, tf_type='Shift', num_workers=2)
     elif data_type == 'MotionSense':
-        test_loader = get_MotionSense(batch_size=batch_size, TF=input_TF, num_workers=1)
+        _,test_loader = get_MotionSense(batch_size=batch_size, TF=input_TF, num_workers=1)
     elif data_type == 'mHealth':
-        test_loader = get_mHealth(batch_size=batch_size, TF=input_TF, num_workers=1)
-    elif data_type == 'oodParkinsons':
-        test_loader = get_oodParkinsons(batch_size=batch_size, TF=input_TF, num_workers=1)
+        _,test_loader = get_mHealth(batch_size=batch_size, TF=input_TF, num_workers=1)
+    else: #data_type == 'oodParkinsons':
+       _,test_loader = get_mHealth(batch_size=batch_size, TF=input_TF, num_workers=1)
+       # _,test_loader = get_oodParkinsons(batch_size=batch_size, TF=input_TF, num_workers=1)
     
     return test_loader
 

@@ -67,4 +67,4 @@ class mHealthData(Dataset):
         return len(self.result)
 
     def __getitem__(self, idx):
-        return [self.result[idx],0]
+        return (self.result[idx],0)

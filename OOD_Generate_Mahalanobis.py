@@ -77,8 +77,8 @@ def main():
     # load dataset
     print('load target data: ', args.dataset)
     if args.dataset == "mpower":
-        train_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinson'sDataloaders/train_loader16.pth")
-        test_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinson'sDataloaders/val_loader16.pth")
+        train_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinsonsDataloaders/val_loader.pth")
+        test_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinsonsDataloaders/val_loader.pth")
     else:
         train_loader, test_loader = data_loader.getTargetDataSet(args.dataset, args.batch_size, in_transform, args.dataroot)
     
