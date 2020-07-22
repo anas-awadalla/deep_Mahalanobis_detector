@@ -50,7 +50,7 @@ def main():
         #out_dist_list = ['cifar10', 'cifar100', 'svhn', 'imagenet_resize', 'lsun_resize', 'face', 'face_age', 'isic-2017', 'isic-2016']
         out_dist_list = ['ham10000-avg-smoothing','ham10000-brightness','ham10000-contrast','ham10000-dilation','ham10000-erosion','ham10000-med-smoothing','ham10000-rotation','ham10000-shift']
     elif args.dataset == 'mpower':
-        out_dist_list = ['mHealth']
+        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData']
     # load networks
     if args.net_type == 'densenet':
         if args.dataset == 'svhn':
@@ -77,8 +77,8 @@ def main():
     # load dataset
     print('load target data: ', args.dataset)
     if args.dataset == "mpower":
-        train_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinson'sDataloaders/val_loader.pth")
-        test_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinson'sDataloaders/val_loader.pth")
+        train_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinson'sDataloaders/train_loader16.pth")
+        test_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinson'sDataloaders/val_loader16.pth")
     else:
         train_loader, test_loader = data_loader.getTargetDataSet(args.dataset, args.batch_size, in_transform, args.dataroot)
     
@@ -98,7 +98,7 @@ def main():
         count += 1
         
     print('get sample mean and covariance')
-    sample_mean, precision = lib_generation.sample_estimator(model, args.num_classes, feature_list, train_loader)
+    sample_mean, precision = lib_generation.sample_estimator(model, args.num_classes, feature_list, train_loader, model_name=args.net_type)
     
     print('get Mahalanobis scores', num_output)
     m_list = [0.0, 0.01, 0.005, 0.002, 0.0014, 0.001, 0.0005]

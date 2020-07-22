@@ -29,7 +29,7 @@ def main():
     list_best_results, list_best_results_index = [], []
     for dataset in dataset_list:
         print('In-distribution: ', dataset)
-        outf = './output/' + args.net_type + '_' + dataset + '/'
+        outf = '/home/anasa2/deep_Mahalanobis_detector/output/' + args.net_type + '_' + dataset + '/'
         out_list = ['svhn', 'imagenet_resize', 'lsun_resize']
         if dataset == 'svhn':
             out_list = ['cifar10', 'imagenet_resize', 'lsun_resize']
@@ -37,7 +37,7 @@ def main():
             #out_list = ['cifar10', 'cifar100', 'svhn', 'imagenet_resize', 'lsun_resize', 'face', 'face_age', 'isic-2017', 'isic-2016'] #face #face_age
             out_list = ['ham10000-avg-smoothing','ham10000-brightness','ham10000-contrast','ham10000-dilation','ham10000-erosion','ham10000-med-smoothing','ham10000-rotation','ham10000-shift'] #face #face_age
         elif dataset == 'mpower':
-            out_list = ["mHealth"]
+            out_list = ['mHealth','MotionSense','oodParkinsonsData']
 
         list_best_results_out, list_best_results_index_out = [], []
         for out in out_list:
@@ -86,7 +86,7 @@ def main():
             #out_list = ['cifar10', 'cifar100', 'svhn', 'imagenet_resize', 'lsun_resize', 'face', 'face_age', 'isic-2017', 'isic-2016']
             out_list = ['ham10000-avg-smoothing','ham10000-brightness','ham10000-contrast','ham10000-dilation','ham10000-erosion','ham10000-med-smoothing','ham10000-rotation','ham10000-shift']
         elif dataset == 'mpower':
-            out_list == ["mHealth"]
+            out_list = ['mHealth','MotionSense','oodParkinsonsData']
             
         count_out = 0
         for results in in_list:

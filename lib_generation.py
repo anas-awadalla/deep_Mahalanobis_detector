@@ -43,7 +43,7 @@ def merge_and_generate_labels(X_pos, X_neg):
 
     return X, y
 
-def sample_estimator(model, num_classes, feature_list, train_loader):
+def sample_estimator(model, num_classes, feature_list, train_loader,model_name=""):
     """
     compute sample mean and precision (inverse of covariance)
     return: sample_class_mean: list of class mean
@@ -65,7 +65,7 @@ def sample_estimator(model, num_classes, feature_list, train_loader):
         list_features.append(temp_list)
     
     for data, target in train_loader:
-        total += data.size(0)
+        total += (data.size(0)*len(data))
 
         dataTensor = data.cuda()
 
@@ -89,7 +89,10 @@ def sample_estimator(model, num_classes, feature_list, train_loader):
             torch.cuda.empty_cache()
             
         # compute the accuracy
-        pred = output.data.max(1)[1]
+        if (model_name == "parkinsonsNet"):
+            pred = torch.round(torch.sigmoid(output.data))
+        else:
+            pred = output.data.max(1)[1]
         equal_flag = pred.eq(target.cuda()).cpu()
         correct += equal_flag.sum()
         

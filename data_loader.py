@@ -15,8 +15,8 @@ from skindataset import SkinDataset
 
 
 def get_mPower(batch_size, TF, data_root='../Evaluating Models/Data/mPower/', train=True, val=True, **kwargs):
-    train_loader =  torch.load(data_root+"train_loader.pth")
-    val_loader =  torch.load(data_root+"val_loader.pth")
+    train_loader =  torch.load(data_root+"train_loader16.pth")
+    val_loader =  torch.load(data_root+"val_loader16.pth")
 
     if train and not val:
         return train_loader
@@ -32,6 +32,7 @@ def get_mHealth(batch_size, TF, data_root='../Evaluating Models/Data/mHealth/', 
         training_set = mHealthData()
         train_loader = torch.utils.data.DataLoader(training_set, batch_size=batch_size, shuffle=True, **kwargs)
         ds.append(train_loader)
+    
     if val:
         validation_set = mHealthData()
         test_loader = torch.utils.data.DataLoader(validation_set, batch_size=batch_size, shuffle=True, **kwargs)
@@ -326,12 +327,6 @@ def getTargetDataSet(data_type, batch_size, input_TF, dataroot):
         train_loader, test_loader = getHAM10000(batch_size=batch_size, TF=input_TF, num_workers=1)
     elif data_type == 'mpower':
         train_loader, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1)
-    # elif data_type == 'MotionSense':
-    #     train_loader, test_loader = get_MotionSense(batch_size=batch_size, TF=input_TF, num_workers=1)
-    # elif data_type == 'mHealth':
-    #     train_loader, test_loader = get_mHealth(batch_size=batch_size, TF=input_TF, num_workers=1)
-    # elif data_type == 'oodParkinsons':
-    #     train_loader, test_loader = get_oodParkinsons(batch_size=batch_size, TF=input_TF, num_workers=1)
 
     return train_loader, test_loader
 
@@ -377,11 +372,11 @@ def getNonTargetDataSet(data_type, batch_size, input_TF, dataroot):
     elif data_type == 'ham10000-shift':
         _, test_loader = getHAM10000Transformed(batch_size=batch_size, TF=input_TF, tf_type='Shift', num_workers=2)
     elif data_type == 'MotionSense':
-        _, test_loader = get_MotionSense(batch_size=batch_size, TF=input_TF, num_workers=1)
+        test_loader = get_MotionSense(batch_size=batch_size, TF=input_TF, num_workers=1)
     elif data_type == 'mHealth':
-        _, test_loader = get_mHealth(batch_size=batch_size, TF=input_TF, num_workers=1)
+        test_loader = get_mHealth(batch_size=batch_size, TF=input_TF, num_workers=1)
     elif data_type == 'oodParkinsons':
-        _, test_loader = get_oodParkinsons(batch_size=batch_size, TF=input_TF, num_workers=1)
+        test_loader = get_oodParkinsons(batch_size=batch_size, TF=input_TF, num_workers=1)
     
     return test_loader
 
