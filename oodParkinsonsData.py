@@ -11,7 +11,7 @@ def correct_batch(batch):
 
 class oodParkinsonsData(Dataset):
 
-    def __init__(self, transform=None):
+    def __init__(self, transform=None, rest=True):
         self.result = []
         self.labels=[]
         k = 0
@@ -21,6 +21,8 @@ class oodParkinsonsData(Dataset):
             self.result[k].append([])
             self.result[k].append([])
             df = pd.read_csv("/home/anasa2/deep_Mahalanobis_detector/Other Parkinson_s Dataset/"+filename)
+            df = df.apply(lambda x: pd.to_numeric(x, errors = 'coerce')).dropna()
+
             start = True
             for data in df.iterrows():
               data=data[1]
@@ -60,6 +62,7 @@ class oodParkinsonsData(Dataset):
             stdev = np.std(np.asarray(self.result[k]))
             mean = np.mean(np.asarray(self.result[k]))
             self.result[k] = ((np.asarray(self.result[k])-mean)/stdev).tolist()
+            
             self.result[k][0] = correct_batch(self.result[k][0])
             self.result[k][1] = correct_batch(self.result[k][1])
             self.result[k][2] = correct_batch(self.result[k][2])
@@ -72,4 +75,4 @@ class oodParkinsonsData(Dataset):
         return len(self.result)
 
     def __getitem__(self, idx):
-        return [self.result[idx], self.labels[idx]]
+        return [np.asarray(self.result[idx]), self.labels[idx]]

@@ -376,8 +376,7 @@ def getNonTargetDataSet(data_type, batch_size, input_TF, dataroot):
     elif data_type == 'mHealth':
         _,test_loader = get_mHealth(batch_size=batch_size, TF=input_TF, num_workers=1)
     else: #data_type == 'oodParkinsons':
-       _,test_loader = get_mHealth(batch_size=batch_size, TF=input_TF, num_workers=1)
-       # _,test_loader = get_oodParkinsons(batch_size=batch_size, TF=input_TF, num_workers=1)
+        _,test_loader = get_oodParkinsons(batch_size=batch_size, TF=input_TF, num_workers=1)
     
     return test_loader
 
