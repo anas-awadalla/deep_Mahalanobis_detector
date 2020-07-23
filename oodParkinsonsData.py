@@ -14,6 +14,12 @@ class oodParkinsonsData(Dataset):
     def __init__(self, transform=None, rest=True):
         self.result = []
         self.labels=[]
+        
+        if rest:
+          act = [2,3,6,7]
+        else:
+          act = [1,4,5,7]
+           
         k = 0
         for filename in tqdm(os.listdir("/home/anasa2/deep_Mahalanobis_detector/Other Parkinson_s Dataset/")):
             self.result.append([])
@@ -26,7 +32,7 @@ class oodParkinsonsData(Dataset):
             start = True
             for data in df.iterrows():
               data=data[1]
-              if(data[6] not in [1,4,5,7]):
+              if(data[6] not in act):
                 continue
 
               if(data[6]!=7):
