@@ -89,7 +89,7 @@ def sample_estimator(model, num_classes, feature_list, train_loader,model_name="
             torch.cuda.empty_cache()
             
         # compute the accuracy
-        if (model_name == "parkinsonsNet"):
+        if (model_name == "parkinsonsNet-rest")|(model_name == "parkinsonsNet-outbound")|(model_name == "parkinsonsNet-return"):
             pred = torch.round(torch.sigmoid(output.data))
         else:
             pred = output.data.max(1)[1]
@@ -137,7 +137,6 @@ def sample_estimator(model, num_classes, feature_list, train_loader,model_name="
             if i == 0:
                 X = list_features[k][i] - sample_class_mean[k][i]
             else:
-                print(X)
                 X = torch.cat((X, list_features[k][i] - sample_class_mean[k][i]), 0)
                 
             torch.cuda.empty_cache()
