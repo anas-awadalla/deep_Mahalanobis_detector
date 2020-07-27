@@ -5,84 +5,74 @@ from torch.utils.data import Dataset, DataLoader
 import math
 import json
 import itertools
+import torch
+from tqdm import tqdm
 
 def correct_batch(batch):
   while len(batch)<4000:
     batch = np.append(batch,0)
   return batch
 
-class testMotionData(Dataset):
+class parkinsonsData(Dataset):
     
-    def __init__(self, df, users, root_dir = '/home/jupyter/park/', transform=None):
-      
-        self.dataset = df
-        self.root_dir = root_dir
-        self.dataArray = []
-        self.resultArray = []
-        iterData = iter(self.dataset.iterrows())
+    def __init__(self, df, col):
+        file_df = pd.read_csv("../../../data3/mPower/52461358.csv")
+        if col==14:
+          files = file_df["deviceMotion_walking_rest.json.items"].tolist()
+        elif col==8:
+          files = file_df["deviceMotion_walking_outbound.json.items"].tolist()
+        else:
+          files = file_df["deviceMotion_walking_return.json.items"].tolist()
 
-        k = 0
+        self.users = pd.read_csv("../../../data3/mPower/users.csv")
+        self.col = col
+        self.dataset = []
 
-        for j,z in zip(iterData,tqdm(range(int(len(self.dataset))))):
-
-          j = j[1]
-          healthcode = j[3]
-        
-          label = users.loc[healthcode][0]
-          
-          for i in [14]:
-            if(not math.isnan(j[i])):
-                filedir = str(int(j[i]/10000))
-                filename = str(j[i])
-                length = len(filename)
-                filename = filename[0:length-2]
-
-                if(os.path.isfile(self.root_dir+filedir+"/"+filename+".json"))|(os.path.isfile(self.root_dir+"data"+"/"+filename+".json")):
-                  if(os.path.isfile(self.root_dir+filedir+"/"+filename+".json")):
-                    f = open(self.root_dir+filedir+"/"+filename+".json")
-                  else:
-                    f = open(self.root_dir+"data/"+filename+".json")
-                try:
-                    data = json.load(f)
-                except:
-                    continue
-                if data != None:
-                    self.dataArray.append([])
-                    self.dataArray[k].append([])
-                    self.dataArray[k].append([])
-                    self.dataArray[k].append([])
-                    for i in range(0,len(data),2):
-                          x = data[i].get("rotationRate")
-                          self.dataArray[k][0].append(x["x"])
-                          self.dataArray[k][1].append(x["y"])
-                          self.dataArray[k][2].append(x["z"])
-
-                    stdev = np.std(np.asarray(self.dataArray[k]))
-                    mean = np.mean(np.asarray(self.dataArray[k]))
-                    self.dataArray[k] = ((np.asarray(self.dataArray[k])-mean)/stdev).tolist()
-
-                    self.dataArray[k][0] = correct_batch(self.dataArray[k][0])
-                    self.dataArray[k][1] = correct_batch(self.dataArray[k][1])
-                    self.dataArray[k][2] = correct_batch(self.dataArray[k][2])
-
-                    if(label):
-                      self.resultArray.append(1)
-                    else:
-                      self.resultArray.append(0)
-
-                    k = k + 1
-
-
-
-        self.dataArray = np.asarray(self.dataArray)
-        unique, counts = np.unique(np.array(self.resultArray), return_counts=True)
-        print(dict(zip(unique, counts)))
-
-
+        for z in tqdm(file_df.iterrows()):
+          healthcode = z[1][3]
+          try:
+            label = self.users.loc[self.users['healthCode'] == healthcode]["professional-diagnosis"]
+            if label.values[0]:
+                  label=1
+            else:
+                  label=0
+            try:
+              if(os.path.exists("../../../data3/mPower/data/"+str(int(z[1][col]))+".json")):
+                    self.dataset.append(["../../../data3/mPower/data/"+str(int(z[1][col]))+".json",label])
+            except:
+              continue
+          except:
+            continue
 
     def __len__(self):
-        return len(self.resultArray)
+        return len(self.dataset)
 
     def __getitem__(self, idx):
-        return [self.dataArray[idx], self.resultArray[idx]]
+        dataPt = self.dataset[idx]
+        f = open(dataPt[0])
+        data = json.load(f)
+        x=[]
+        x.append([])
+        x.append([])
+        x.append([])
+         
+        for i in range(0,len(data),2):
+            rot = data[i].get("rotationRate")
+            x[0].append(rot["x"])
+            x[1].append(rot["y"])
+            x[2].append(rot["z"])
+                         
+        x[0] = correct_batch(x[0])
+        x[1] = correct_batch(x[1])
+        x[2] = correct_batch(x[2])
+        
+        stdev = np.std(np.asarray(x))
+        mean = np.mean(np.asarray(x))
+        x = ((np.asarray(x)-mean)/stdev)#.tolist()
+
+        # x[0] = correct_batch(x[0])
+        # x[1] = correct_batch(x[1])
+        # x[2] = correct_batch(x[2])
+        
+        return [x, dataPt[1]]
 

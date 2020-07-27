@@ -17,17 +17,22 @@ class mHealthData(Dataset):
         self.labels=[]
         k = 0
         for filename in tqdm(os.listdir("/home/anasa2/deep_Mahalanobis_detector/mHealth Data/")):
+        
+            try:
+                df = pd.read_csv("/home/anasa2/deep_Mahalanobis_detector/mHealth Data/"+filename, delimiter= '\s+', index_col=False)
+            except:
+                continue
+            
             self.result.append([])
             self.result[k].append([])
             self.result[k].append([])
             self.result[k].append([])
             
-            df = pd.read_csv("/home/anasa2/deep_Mahalanobis_detector/mHealth Data/"+filename, delimiter= '\s+', index_col=False)
             start = True
             eof = False
             for data in df.iterrows():
               data=data[1]
-              if(data[23] not in [1,2,3,7,8]):
+              if(data[23] in [1,2,3,7,8]):
                  continue
     
               if(len(self.result[k][0])>=4000):

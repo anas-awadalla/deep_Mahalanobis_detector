@@ -23,12 +23,12 @@ class MotionSenseData(Dataset):
         for dir in tqdm(os.listdir("/home/anasa2/deep_Mahalanobis_detector/MotionSense/")):
             if (dir[:3] in act):
                 for filename in os.listdir("/home/anasa2/deep_Mahalanobis_detector/MotionSense/"+dir):
-                        # try:
-                        df = pd.read_csv("/home/anasa2/deep_Mahalanobis_detector/MotionSense/"+dir+"/"+filename)
-                        df = df.apply(lambda x: pd.to_numeric(x, errors = 'coerce')).dropna()
- 
-                           # except:
-                        #     continue
+                        try:
+                            df = pd.read_csv("/home/anasa2/deep_Mahalanobis_detector/MotionSense/"+dir+"/"+filename)
+                            df = df.apply(lambda x: pd.to_numeric(x, errors = 'coerce')).dropna()
+                        except:
+                            continue
+                        
                         self.result.append([])
                         self.result[k].append([])
                         self.result[k].append([])

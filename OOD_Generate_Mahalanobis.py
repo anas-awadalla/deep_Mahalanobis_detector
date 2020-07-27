@@ -14,7 +14,6 @@ import parkinsonsNet
 import os
 import lib_generation
 from parkinsonsNet import Network
-from parkinsons_dataset import testMotionData
 
 from torchvision import transforms
 from torch.autograd import Variable
@@ -49,8 +48,12 @@ def main():
         #out_dist_list = ['cifar10', 'face', 'face_age', 'isic-2017', 'isic-2016']
         #out_dist_list = ['cifar10', 'cifar100', 'svhn', 'imagenet_resize', 'lsun_resize', 'face', 'face_age', 'isic-2017', 'isic-2016']
         out_dist_list = ['ham10000-avg-smoothing','ham10000-brightness','ham10000-contrast','ham10000-dilation','ham10000-erosion','ham10000-med-smoothing','ham10000-rotation','ham10000-shift']
-    elif args.dataset == 'mpower':
-        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData']
+    elif args.dataset == 'mpower-rest':
+        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData',"mpower-rest"]
+    elif args.dataset == 'mpower-outbound':
+        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData',"mpower-outbound"]
+    elif args.dataset == 'mpower-return':
+        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData',"mpower-return"]
     # load networks
     if args.net_type == 'densenet':
         if args.dataset == 'svhn':
@@ -67,8 +70,13 @@ def main():
         model = DenseNet121(num_classes=args.num_classes)
         model.load_state_dict(torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu)).state_dict())
         in_transform = transforms.Compose([transforms.Resize(224), transforms.CenterCrop(224), transforms.ToTensor(), transforms.Normalize((0.7630069, 0.5456578, 0.5700767), (0.14093237, 0.15263236, 0.17000099))])
-    elif args.net_type == 'parkinsonsNet':
-        model = Network()
+    elif args.net_type == 'parkinsonsNet-rest':
+        model= torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu))
+        in_transform = None
+    elif args.net_type == 'parkinsonsNet-return':
+        model= torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu))
+        in_transform = None
+    elif args.net_type == 'parkinsonsNet-outbound':
         model= torch.load(pre_trained_net, map_location = "cuda:" + str(args.gpu))
         in_transform = None
     model.cuda()
@@ -76,17 +84,13 @@ def main():
     
     # load dataset
     print('load target data: ', args.dataset)
-    if args.dataset == "mpower":
-        train_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinsonsDataloaders/val_loader.pth")
-        test_loader = torch.load("/home/anasa2/deep_Mahalanobis_detector/originalParkinsonsDataloaders/val_loader.pth")
-    else:
-        train_loader, test_loader = data_loader.getTargetDataSet(args.dataset, args.batch_size, in_transform, args.dataroot)
+    train_loader, test_loader = data_loader.getTargetDataSet(args.dataset, args.batch_size, in_transform, args.dataroot)
     
     # set information about feature extaction
     model.eval()
     temp_x = torch.rand(2,3,32,32).cuda()
     temp_x = Variable(temp_x)
-    if args.net_type == 'parkinsonsNet':
+    if (args.net_type == 'parkinsonsNet-rest') | (args.net_type == 'parkinsonsNet-return') | (args.net_type == 'parkinsonsNet-outbound'):
         temp_x = torch.rand(8,3,4000).cuda()
         temp_x = Variable(temp_x) 
     temp_list = model.feature_list(temp_x)[1]

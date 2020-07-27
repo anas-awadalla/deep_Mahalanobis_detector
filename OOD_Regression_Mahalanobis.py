@@ -21,8 +21,12 @@ def main():
 
     if args.net_type == 'densenet121':
         dataset_list = ['ham10000']
-    elif args.net_type == "parkinsonsNet":
-        dataset_list = ['mpower']    
+    elif args.net_type == "parkinsonsNet-rest":
+        dataset_list = ['mpower-rest'] 
+    elif args.net_type == "parkinsonsNet-return":
+        dataset_list = ['mpower-return']
+    elif args.net_type == "parkinsonsNet-outbound":
+        dataset_list = ['mpower-outbound']   
     score_list = ['Mahalanobis_0.0', 'Mahalanobis_0.01', 'Mahalanobis_0.005', 'Mahalanobis_0.002', 'Mahalanobis_0.0014', 'Mahalanobis_0.001', 'Mahalanobis_0.0005']
     
     # train and measure the performance of Mahalanobis detector
@@ -36,8 +40,12 @@ def main():
         elif dataset == 'ham10000':
             #out_list = ['cifar10', 'cifar100', 'svhn', 'imagenet_resize', 'lsun_resize', 'face', 'face_age', 'isic-2017', 'isic-2016'] #face #face_age
             out_list = ['ham10000-avg-smoothing','ham10000-brightness','ham10000-contrast','ham10000-dilation','ham10000-erosion','ham10000-med-smoothing','ham10000-rotation','ham10000-shift'] #face #face_age
-        elif dataset == 'mpower':
-            out_list = ['mHealth','MotionSense','oodParkinsonsData']
+        elif dataset == 'mpower-rest':
+            out_list = ['mHealth','MotionSense','oodParkinsonsData','mpower-rest']
+        elif dataset == 'mpower-return':
+            out_list = ['mHealth','MotionSense','oodParkinsonsData','mpower-return']
+        elif dataset == 'mpower-outbound':
+            out_list = ['mHealth','MotionSense','oodParkinsonsData','mpower-outbound']
 
         list_best_results_out, list_best_results_index_out = [], []
         for out in out_list:
@@ -85,8 +93,8 @@ def main():
         elif dataset == 'ham10000':
             #out_list = ['cifar10', 'cifar100', 'svhn', 'imagenet_resize', 'lsun_resize', 'face', 'face_age', 'isic-2017', 'isic-2016']
             out_list = ['ham10000-avg-smoothing','ham10000-brightness','ham10000-contrast','ham10000-dilation','ham10000-erosion','ham10000-med-smoothing','ham10000-rotation','ham10000-shift']
-        elif dataset == 'mpower':
-            out_list = ['mHealth','MotionSense','oodParkinsonsData']
+        elif dataset == 'mpower-rest':
+            out_list = ['mHealth','MotionSense','oodParkinsonsData','MotionSense','mpower-rest']
             
         count_out = 0
         for results in in_list:

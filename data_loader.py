@@ -12,18 +12,24 @@ from mHealthData import mHealthData
 from MotionSenseData import MotionSenseData
 from oodParkinsonsData import oodParkinsonsData
 from skindataset import SkinDataset
+from parkinsons_dataset import parkinsonsData
 
 
-def get_mPower(batch_size, TF, data_root='../Evaluating Models/Data/mPower/', train=True, val=True, **kwargs):
-    train_loader =  torch.load(data_root+"train_loader16.pth")
-    val_loader =  torch.load(data_root+"val_loader16.pth")
+def get_mPower(batch_size, TF, data_root='../Evaluating Models/Data/mPower/', train=True, val=True,col=14, **kwargs):
+    ds = []
+    files = os.listdir("../../../data3/mPower/data")
+    train, test = train_test_split(files, test_size=0.2)
+    if train:
+        training_set = parkinsonsData(train, col=col)
+        train_loader = torch.utils.data.DataLoader(training_set, batch_size=batch_size, shuffle=True, **kwargs)
+        ds.append(train_loader)
+    
+    if val:
+        validation_set = parkinsonsData(test, col=col)
+        test_loader = torch.utils.data.DataLoader(validation_set, batch_size=batch_size, shuffle=True, **kwargs)
+        ds.append(test_loader)
 
-    if train and not val:
-        return train_loader
-    elif not train and val:
-        return val_loader 
-    else:
-        return train_loader, val_loader
+    return ds
 
 def get_mHealth(batch_size, TF, data_root='../Evaluating Models/Data/mHealth/', train=True, val=True, **kwargs):
     ds = []
@@ -325,8 +331,12 @@ def getTargetDataSet(data_type, batch_size, input_TF, dataroot):
         train_loader, test_loader = getSVHN(batch_size=batch_size, TF=input_TF, data_root=dataroot, num_workers=1)
     elif data_type == 'ham10000':
         train_loader, test_loader = getHAM10000(batch_size=batch_size, TF=input_TF, num_workers=1)
-    elif data_type == 'mpower':
-        train_loader, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1)
+    elif data_type == 'mpower-rest':
+        train_loader, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1, col=14)
+    elif data_type == 'mpower-outbound':
+        train_loader, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1, col=8)
+    else: #data_type == 'mpower-return':
+        train_loader, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1, col=11)
 
     return train_loader, test_loader
 
@@ -375,8 +385,15 @@ def getNonTargetDataSet(data_type, batch_size, input_TF, dataroot):
         _,test_loader = get_MotionSense(batch_size=batch_size, TF=input_TF, num_workers=1)
     elif data_type == 'mHealth':
         _,test_loader = get_mHealth(batch_size=batch_size, TF=input_TF, num_workers=1)
+    elif data_type == 'mpower-rest':
+        _, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1, col=14)
+    elif data_type == 'mpower-outbound':
+        _, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1, col=8)
+    elif data_type == 'mpower-return':
+         _, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1, col=11)
     else: #data_type == 'oodParkinsons':
         _,test_loader = get_oodParkinsons(batch_size=batch_size, TF=input_TF, num_workers=1)
+    
     
     return test_loader
 
