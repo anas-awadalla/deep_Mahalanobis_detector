@@ -28,7 +28,7 @@ class parkinsonsData(Dataset):
         self.col = col
         self.dataset = []
 
-        for z in tqdm(file_df.iterrows()):
+        for z, a in zip(tqdm(file_df.iterrows()),tqdm(file_df)):
           healthcode = z[1][3]
           try:
             label = self.users.loc[self.users['healthCode'] == healthcode]["professional-diagnosis"]
@@ -38,7 +38,33 @@ class parkinsonsData(Dataset):
                   label=0
             try:
               if(os.path.exists("../../../data3/mPower/data/"+str(int(z[1][col]))+".json")):
-                    self.dataset.append(["../../../data3/mPower/data/"+str(int(z[1][col]))+".json",label])
+                f = open("../../../data3/mPower/data/"+str(int(z[1][col]))+".json")
+                data = json.load(f)
+                x=[]
+                x.append([])
+                x.append([])
+                x.append([])
+                
+                for i in range(0,len(data),2):
+                    rot = data[i].get("rotationRate")
+                    x[0].append(rot["x"])
+                    x[1].append(rot["y"])
+                    x[2].append(rot["z"])
+                    
+                stdev = np.std(np.asarray(x))
+                mean = np.mean(np.asarray(x))
+                x = ((np.asarray(x)-mean)/stdev)
+                                
+                x[0] = correct_batch(x[0])
+                x[1] = correct_batch(x[1])
+                x[2] = correct_batch(x[2])
+                
+                # stdev = np.std(np.asarray(x))
+                # mean = np.mean(np.asarray(x))
+                # x = ((np.asarray(x)-mean)/stdev)
+                
+                self.dataset.append([x,label])
+                
             except:
               continue
           except:
@@ -48,31 +74,28 @@ class parkinsonsData(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        dataPt = self.dataset[idx]
-        f = open(dataPt[0])
-        data = json.load(f)
-        x=[]
-        x.append([])
-        x.append([])
-        x.append([])
+        # dataPt = self.dataset[idx]
+        # f = open(dataPt[0])
+        # data = json.load(f)
+        # x=[]
+        # x.append([])
+        # x.append([])
+        # x.append([])
          
-        for i in range(0,len(data),2):
-            rot = data[i].get("rotationRate")
-            x[0].append(rot["x"])
-            x[1].append(rot["y"])
-            x[2].append(rot["z"])
+        # for i in range(0,len(data),2):
+        #     rot = data[i].get("rotationRate")
+        #     x[0].append(rot["x"])
+        #     x[1].append(rot["y"])
+        #     x[2].append(rot["z"])
                          
-        x[0] = correct_batch(x[0])
-        x[1] = correct_batch(x[1])
-        x[2] = correct_batch(x[2])
-        
-        stdev = np.std(np.asarray(x))
-        mean = np.mean(np.asarray(x))
-        x = ((np.asarray(x)-mean)/stdev)#.tolist()
-
         # x[0] = correct_batch(x[0])
         # x[1] = correct_batch(x[1])
         # x[2] = correct_batch(x[2])
         
-        return [x, dataPt[1]]
+        # stdev = np.std(np.asarray(x))
+        # mean = np.mean(np.asarray(x))
+        # x = ((np.asarray(x)-mean)/stdev)
+        
+        
+        return self.dataset[idx]
 
