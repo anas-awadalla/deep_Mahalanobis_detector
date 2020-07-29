@@ -75,9 +75,9 @@ def analyze(in_distribution, out_of_distribution, channel_labels, is_image=False
         tabs = []
         for i, label in zip(data, data_labels):
             i = i.cpu().detach().numpy()
-            tabs.append((label,pn.Column(dde.pixel_dist_img(i,channel_labels), 
-                                         dde.color_dist_img(i,channel_labels), 
-                                         dde.multi_dem_color_hist(i,channel_labels))))
+            tabs.append((label,pn.Column(dde.pixel_dist_img(i), 
+                                         dde.color_dist_img(i), 
+                                         dde.multi_dem_color_hist(i))))
                 
         dashboard = pn.Column(dashboard_title,dashboard_desc, dde.param,  pn.Tabs(*tabs))
         print("Conducting the following comparisions for image data: Color distribution, Pixel distribution, and Variance of laplacian operators")
