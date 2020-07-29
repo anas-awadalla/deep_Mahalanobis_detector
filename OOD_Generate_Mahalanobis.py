@@ -104,6 +104,12 @@ def main():
     print('get sample mean and covariance')
     sample_mean, precision = lib_generation.sample_estimator(model, args.num_classes, feature_list, train_loader, model_name=args.net_type)
     
+    print('Generate dataloaders...')
+
+    out_test_loaders=[]
+    for out_dist in out_dist_list:
+            out_test_loaders.append(data_loader.getNonTargetDataSet(out_dist, args.batch_size, in_transform, args.dataroot))
+    
     print('get Mahalanobis scores', num_output)
     m_list = [0.0, 0.01, 0.005, 0.002, 0.0014, 0.001, 0.0005]
     for magnitude in m_list:
@@ -118,8 +124,8 @@ def main():
             else:
                 Mahalanobis_in = np.concatenate((Mahalanobis_in, M_in.reshape((M_in.shape[0], -1))), axis=1)
             
-        for out_dist in out_dist_list:
-            out_test_loader = data_loader.getNonTargetDataSet(out_dist, args.batch_size, in_transform, args.dataroot)
+        for out_test_loader, out_dist in zip(out_test_loaders,out_dist_list):
+            # out_test_loader = data_loader.getNonTargetDataSet(out_dist, args.batch_size, in_transform, args.dataroot)
             print('Out-distribution: ' + out_dist) 
             for i in range(num_output):
                 M_out = lib_generation.get_Mahalanobis_score(model, out_test_loader, args.num_classes, args.outf, \

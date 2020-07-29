@@ -32,7 +32,7 @@ class mHealthData(Dataset):
             eof = False
             for data in df.iterrows():
               data=data[1]
-              if(data[23] in [1,2,3,7,8]):
+              if(data[23] not in [1,2,3,7,8]):
                  continue
     
               if(len(self.result[k][0])>=4000):
