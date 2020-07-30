@@ -385,11 +385,11 @@ def getNonTargetDataSet(data_type, batch_size, input_TF, dataroot):
         _,test_loader = get_MotionSense(batch_size=batch_size, TF=input_TF, num_workers=1)
     elif data_type == 'mHealth':
         _,test_loader = get_mHealth(batch_size=batch_size, TF=input_TF, num_workers=1)
-    elif data_type == 'mpower-rest':
+    elif data_type == 'mpower-rst':
         _, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1, col=14)
-    elif data_type == 'mpower-outbound':
+    elif data_type == 'mpower-out':
         _, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1, col=8)
-    elif data_type == 'mpower-return':
+    elif data_type == 'mpower-ret':
          _, test_loader = get_mPower(batch_size=batch_size, TF=input_TF, num_workers=1, col=11)
     else: #data_type == 'oodParkinsons':
         _,test_loader = get_oodParkinsons(batch_size=batch_size, TF=input_TF, num_workers=1)

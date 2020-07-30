@@ -13,7 +13,7 @@ def correct_batch(batch):
 
 class MotionSenseData(Dataset):
 
-    def __init__(self, rest=False):
+    def __init__(self, rest=True):
         if rest:
             act = ["sit", "std"]
         else:

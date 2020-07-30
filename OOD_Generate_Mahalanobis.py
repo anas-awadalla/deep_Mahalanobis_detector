@@ -49,11 +49,11 @@ def main():
         #out_dist_list = ['cifar10', 'cifar100', 'svhn', 'imagenet_resize', 'lsun_resize', 'face', 'face_age', 'isic-2017', 'isic-2016']
         out_dist_list = ['ham10000-avg-smoothing','ham10000-brightness','ham10000-contrast','ham10000-dilation','ham10000-erosion','ham10000-med-smoothing','ham10000-rotation','ham10000-shift']
     elif args.dataset == 'mpower-rest':
-        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData',"mpower-rest"]
+        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData',"mpower-rst"]
     elif args.dataset == 'mpower-outbound':
-        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData',"mpower-outbound"]
+        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData',"mpower-out"]
     elif args.dataset == 'mpower-return':
-        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData',"mpower-return"]
+        out_dist_list = ['mHealth','MotionSense','oodParkinsonsData',"mpower-ret"]
     # load networks
     if args.net_type == 'densenet':
         if args.dataset == 'svhn':

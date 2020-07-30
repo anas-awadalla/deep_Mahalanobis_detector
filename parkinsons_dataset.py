@@ -74,6 +74,6 @@ class parkinsonsData(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        
+        print(self.dataset[idx][0])
         return self.dataset[idx][0], self.dataset[idx][1] 
 

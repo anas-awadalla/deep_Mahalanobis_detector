@@ -32,29 +32,26 @@ class mHealthData(Dataset):
             eof = False
             for data in df.iterrows():
               data=data[1]
-              if(data[23] not in [1,2,3,7,8]):
-                 continue
-    
               if(len(self.result[k][0])>=4000):
-                eof = True
-                stdev = np.std(np.asarray(self.result[k]))
-                mean = np.mean(np.asarray(self.result[k]))
-                self.result[k] = ((np.asarray(self.result[k])-mean)/stdev).tolist()
+                    eof = True
+                    stdev = np.std(np.asarray(self.result[k]))
+                    mean = np.mean(np.asarray(self.result[k]))
+                    self.result[k] = ((np.asarray(self.result[k])-mean)/stdev).tolist()
 
-                self.result[k][0] = correct_batch(self.result[k][0])
-                self.result[k][1] = correct_batch(self.result[k][1])
-                self.result[k][2] = correct_batch(self.result[k][2])
-                k=k+1
-                self.result.append([])
-                self.result[k].append([])
-                self.result[k].append([])
-                self.result[k].append([])
-                self.labels.append(0)
+                    self.result[k][0] = correct_batch(self.result[k][0])
+                    self.result[k][1] = correct_batch(self.result[k][1])
+                    self.result[k][2] = correct_batch(self.result[k][2])
+                    k=k+1
+                    self.result.append([])
+                    self.result[k].append([])
+                    self.result[k].append([])
+                    self.result[k].append([])
+                    self.labels.append(0)
 
-              self.result[k][0].append(data[17])
-              self.result[k][1].append(data[18])
-              self.result[k][2].append(data[19])
-              eof = False
+                    self.result[k][0].append(data[17])
+                    self.result[k][1].append(data[18])
+                    self.result[k][2].append(data[19])
+                    eof = False
 
             stdev = np.std(np.asarray(self.result[k]))
             mean = np.mean(np.asarray(self.result[k]))
@@ -64,6 +61,8 @@ class mHealthData(Dataset):
             self.result[k][2] = correct_batch(self.result[k][2])
             k = k+1
         self.result = np.asarray(self.result)
+    
+        print(len(self.result))
 
 
 

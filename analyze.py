@@ -42,16 +42,16 @@ def analyze(in_distribution, out_of_distribution, channel_labels, is_image=False
         out_of_distribution = [out_of_distribution]
         
     if data_labels is None:
-        data_labels = ["in_channel"]
+        data_labels = ["in_distribution"]
         for i in range(len(out_of_distribution)):
-            data_labels.append("out_channel_"+str(i))
-            
+            data_labels.append("out_distribution_"+str(i))
+    
     print("Getting sample from datasets...")
     samples = []
     in_distribution_subset = torch.utils.data.Subset(in_distribution, [0])   
-    in_distrbution_sample = torch.utils.data.DataLoader(in_distribution_subset, batch_size=1, num_workers=0, shuffle=False)
+    in_distrbution_sample = torch.utils.data.DataLoader(in_distribution_subset, batch_size=1, num_workers=0, shuffle=True)
     for i in out_of_distribution:
-        samples.append(torch.utils.data.DataLoader(torch.utils.data.Subset(i, [0]), batch_size=1, num_workers=0, shuffle=False))
+        samples.append(torch.utils.data.DataLoader(torch.utils.data.Subset(i, [0]), batch_size=1, num_workers=0, shuffle=True))
     print("Checking Data Demensions...")
 
     in_dist_shape = list(next(iter(in_distrbution_sample))[0].size())
@@ -74,7 +74,7 @@ def analyze(in_distribution, out_of_distribution, channel_labels, is_image=False
 
         tabs = []
         for i, label in zip(data, data_labels):
-            i = i.cpu().detach().numpy()
+            i = i[0].permute(1,2,0).cpu().detach().numpy()
             tabs.append((label,pn.Column(dde.pixel_dist_img(i), 
                                          dde.color_dist_img(i), 
                                          dde.multi_dem_color_hist(i))))

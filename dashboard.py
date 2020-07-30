@@ -1,3 +1,4 @@
+
 from collections.abc import Iterable
 from tqdm import tqdm
 import torch
@@ -11,43 +12,55 @@ import numpy as np
 import seaborn as sns
 import panel as pn
 
+
 class DashboardDataElements(param.Parameterized):
         def pixel_dist_img(self, image):
             print("Generating Pixel Distribution Histogram...")
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            cv2.imshow("gray", gray)
-            hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
             fig = plt.figure()
-            print("Calculating Variance of Laplacian Operators...")
-            vlo = cv2.Laplacian(gray, cv2.CV_64F).var()
-            plt.text(3, 8, ('Variance of Laplacian: '+str(vlo)), style='italic', bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
-            plt.title("Grayscale Histogram")
-            plt.xlabel("Bins")
-            plt.ylabel("# of Pixels")
-            plt.plot(hist)
-            plt.xlim([0, 256])
+
+            # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            # hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
+
+            # print("Calculating Variance of Laplacian Operators...")
+            # plt.title("Grayscale Histogram")
+            plt.ylabel("Count")
+            plt.xlabel("Intensity Value")
+            # plt.plot(hist)
+            # plt.xlim([0, 256])
+            ax = plt.hist(image.ravel(), bins = 256)
             return fig
         
         
         def color_dist_img(self, image):
             print("Generating Color Distribution Histogram...")
-            chans = cv2.split(image)
-            colors = ("b", "g", "r")
+            # chans = cv2.split(image)
+            # colors = ("b", "g", "r")
             fig = plt.figure()
-            plt.title("'Flattened' Color Histogram")
-            plt.xlabel("Bins")
-            plt.ylabel("# of Pixels")
-            features = []
-            # loop over the image channels
-            for (chan, color) in zip(chans, colors):
-                # create a histogram for the current channel and
-                # concatenate the resulting histograms for each
-                # channel
-                hist = cv2.calcHist([chan], [0], None, [256], [0, 256])
-                features.extend(hist)
-                # plot the histogram
-                plt.plot(hist, color = color)
-                plt.xlim([0, 256])
+            vlo = cv2.Laplacian(image, cv2.CV_32F).var()
+            plt.text(3, 8, ('Variance of Laplacian: '+str(vlo)), style='italic', bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+            
+            
+            _ = plt.hist(image.ravel(), bins = 256, color = 'orange', )
+            _ = plt.hist(image[:, :, 0].ravel(), bins = 256, color = 'red', alpha = 0.5)
+            _ = plt.hist(image[:, :, 1].ravel(), bins = 256, color = 'Green', alpha = 0.5)
+            _ = plt.hist(image[:, :, 2].ravel(), bins = 256, color = 'Blue', alpha = 0.5)
+            _ = plt.xlabel('Intensity Value')
+            _ = plt.ylabel('Count')
+            _ = plt.legend(['Total', 'Red_Channel', 'Green_Channel', 'Blue_Channel'])
+            # plt.title("'Flattened' Color Histogram")
+            # plt.xlabel("Bins")
+            # plt.ylabel("# of Pixels")
+            # features = []
+            # # loop over the image channels
+            # for (chan, color) in zip(chans, colors):
+            #     # create a histogram for the current channel and
+            #     # concatenate the resulting histograms for each
+            #     # channel
+            #     hist = cv2.calcHist([chan], [0], None, [256], [0, 256])
+            #     features.extend(hist)
+            #     # plot the histogram
+            #     plt.plot(hist, color = color)
+            #     plt.xlim([0, 256])
            
             return fig
             
@@ -149,4 +162,3 @@ class DashboardDataElements(param.Parameterized):
                 stdev.append(np.std(np.asarray(i)))
             df = pd.DataFrame({"Channels":channel_labels,"Standard Deviation":stdev})
             return df
-
